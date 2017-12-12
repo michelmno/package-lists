@@ -28,7 +28,7 @@ esac
 (cd osc/openSUSE\:$proj/$product/ && osc up)
 osc api "/build/openSUSE:$proj/_result?package=bash&repository=$repo" > "$proj.state"
 if grep -q 'dirty="true"' "$proj.state" || grep -q 'state="building"' "$proj.state"; then
-   echo "$repo still dirty"
+    echo "$repo still dirty (in $proj.state)"
    if test -z "$FORCE"; then
      exit 0
    fi
