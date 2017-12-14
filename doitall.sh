@@ -41,9 +41,13 @@ if [ "$proj" = "Factory" -o "$proj" = "Leap:42.3" ]; then
 fi
 
 cd update-tests
-./testall.sh $proj $product > update-tests-report.$proj.txt 2>&1
-
 file="update-tests-report.$proj.txt"
+if [ "$proj" = "Factory:PowerPC" ]; then
+    echo "testall.sh not called for $proj" >$file
+else
+    ./testall.sh $proj $product > $file 2>&1
+fi
+
 remote="/source/openSUSE:$proj:Staging/dashboard/update-tests.txt"
 if [ "$(< "$file")" != "$(osc api "$remote")" ] ; then
   osc -d api -X PUT -f "$file" "$remote"
