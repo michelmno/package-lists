@@ -51,7 +51,14 @@ for arch in $arches; do
     fi
 done
 
-( cd osc/openSUSE:$proj/$product/ && osc ci -m "auto update" > /dev/null )
+pushd osc/openSUSE:$proj/$product/ >/dev/null
+if test -z "$DRY"; then
+    osc ci -m "auto update" > /dev/null
+else
+    echo "in " $(pwd)
+    osc status
+fi
+popd >/dev/null
 
 if [ "$arches" = "i586 x86_64" ];then
    test -d osc/openSUSE:$proj:Live || (cd osc; osc co -e openSUSE:$proj:Live)
@@ -83,7 +90,11 @@ if [ -f trees/openSUSE:$proj-$repo-$arch.solv ]; then
   remote="/source/openSUSE:$proj:Staging/dashboard/installcheck"
 
   installcheck $arch --withobsoletes trees/openSUSE:$proj-$repo-$arch.solv > "$file"
-  if [ "$(< "$file")" != "$(osc api "$remote")" ] ; then
-    osc -d api -X PUT -f "$file" "$remote"
+  if [ "$(< "$file")" != "$(osc api "$remote" 2>/dev/null)" ] ; then
+    if test -z "$DRY"; then
+	osc -d api -X PUT -f "$file" "$remote"
+    else
+	echo "$file is new versus OBS $remote"
+    fi
   fi
 fi
